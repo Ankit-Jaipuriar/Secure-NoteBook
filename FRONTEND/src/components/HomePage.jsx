@@ -1,7 +1,7 @@
 import { useTheme } from "../context/ThemeContext";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const HomePage = () => {
   const { isDark, toggleTheme } = useTheme();
@@ -51,10 +51,10 @@ const HomePage = () => {
     <main className={`w-full h-screen ${isDark ? "bg-zinc-900 text-white" : "bg-zinc-100 text-black"} font-['Helvetica']`}>
       {/* Navbar */}
       <nav className="flex px-10 justify-between py-5">
-        <h3 className="text-2xl tracking-tight">Khaatabook</h3>
+        <h3 className="text-2xl tracking-tight">Secure-NoteBook</h3>
         <div className="navlinks flex gap-5">
-          <a className="tracking-tight" href="/">Home</a>
-          <a className="tracking-tight" href="/create">Create New Hisaab</a>
+        <Link className="tracking-tight" to="/Home">Home</Link>
+        <Link className="tracking-tight" to="/create">Create New Hisaab</Link>
         </div>
         <div className="flex gap-3 items-center">
           <button onClick={toggleTheme} className="text-xl">

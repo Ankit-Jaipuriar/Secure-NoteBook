@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from "react-router-dom";
 
 const CreateHisaab = () => {
   // State to manage form inputs
@@ -8,18 +9,18 @@ const CreateHisaab = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // You can handle the form data submission here
-    // For example, send a POST request to the server
+    //handle the form data submission here
+    // send a POST request to the server
     console.log({ title, content });
   };
 
   return (
     <main className="w-full h-screen bg-zinc-100 font-['Helvetica']">
       <nav className="flex px-10 justify-between py-5">
-        <h3 className="text-2xl tracking-tight">Khaatabook</h3>
+        <h3 className="text-2xl tracking-tight">Secure-NoteBook</h3>
         <div className="navlinks flex gap-5">
-          <a className="tracking-tight" href="/">Home</a>
-          <a className="tracking-tight" href="/create">Create New Hisaab</a>
+          <Link className="tracking-tight" to="/Home">Home</Link>
+          <Link className="tracking-tight" to="/create">Create New Hisaab</Link>
         </div>
       </nav>
       <div className="px-10 hisaabs">
