@@ -26,23 +26,41 @@ app.use(cookieParser());
 app.post("/api/register", async (req, res) => {
   let { email, password } = req.body;
 
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) console.error("Error generating salt:", err);
+  try {
+    // Check if the user already exists
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).send({ error: "Email already exists. Please use another email." });
+    }
 
-    bcrypt.hash(password, salt, async (err, hash) => {
-      if (err) console.error("Error hashing password:", err);
+    // Generate salt and hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-      let createdUser = await userModel.create({
-        email,
-        password: hash,
-      });
-      let token = jwt.sign({ email }, "shhhhh");
-      res.cookie("token", token, { httpOnly: true }); // Ensure secure cookie handling
-      res.send(createdUser);
+    // Create the user in the database
+    const createdUser = await userModel.create({
+      email,
+      password: hashedPassword,
     });
-  });
-});
 
+    // Generate JWT token
+    const token = jwt.sign({ email }, "shhhhh");
+
+    // Set a secure HTTP-only cookie
+    res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict" });
+
+    // Send success response
+    res.status(201).send({ message: "User registered successfully", user: createdUser });
+  } catch (error) {
+    if (error.code === 11000) {
+      // Handle duplicate key error
+      res.status(400).send({ error: "Email already exists. Please use another email." });
+    } else {
+      // Handle other server errors
+      res.status(500).send({ error: "Internal server error", details: error.message });
+    }
+  }
+});
 // Login Route
 app.post("/api/login", async (req, res) => {
   let user = await userModel.findOne({ email: req.body.email });
