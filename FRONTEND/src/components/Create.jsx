@@ -1,17 +1,33 @@
 import React, { useState } from 'react';
 import { Link } from "react-router-dom";
+import axios from 'axios';
 
 const CreateHisaab = () => {
-  // State to manage form inputs
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [message, setMessage] = useState("");
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Ensure cookies are sent with requests
+  axios.defaults.withCredentials = true;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    //handle the form data submission here
-    // send a POST request to the server
-    console.log({ title, content });
+
+    // Basic validation
+    if (!title || !content) {
+      setMessage("Title and Content are required.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("/api/upload", { fileName: title, content });
+
+      // Assuming a success message is returned from the server
+      setMessage(response.data.message || "Uploaded Successfully");
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      setMessage("An error occurred while uploading the file.");
+    }
   };
 
   return (
@@ -47,6 +63,7 @@ const CreateHisaab = () => {
             value="Create Hisaab"
           />
         </form>
+        {message && <p className="text-red-500 mt-3">{message}</p>}
       </div>
     </main>
   );

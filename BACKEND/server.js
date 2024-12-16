@@ -6,6 +6,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const userModel = require("./models/user");
+const userFile = require("./models/file")
+const authenticate = require('./middleware/authenticate');
 
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.json());
@@ -61,6 +63,8 @@ app.post("/api/register", async (req, res) => {
     }
   }
 });
+
+
 // Login Route
 app.post("/api/login", async (req, res) => {
   let user = await userModel.findOne({ email: req.body.email });
@@ -91,7 +95,7 @@ app.get('/api/verify-token', (req, res) => {
 
   try {
     // Verify the token (using a library like jwt.verify if using JWT)
-    const decoded = jwt.verify(token, 'shhhh'); // Replace 'your-secret-key' with your actual secret
+    const decoded = jwt.verify(token, 'shhhh'); 
     res.status(200).send('Authenticated'); // Token is valid
   } catch (error) {
     res.status(401).send('Invalid token'); // Token is invalid or expired
@@ -104,11 +108,38 @@ app.get("/api/logout", function(req,res){
   res.send("Logged out")
 })
 
-// Example API Route
-app.get("/api/files", (req, res) => {
-  const files = ["hisaab1.txt", "hisaab2.txt", "hisaab3.txt"];
-  res.json(files);
+
+app.get("/api/files", authenticate, async (req, res) => {
+  try {
+    // Fetch files associated with the authenticated user
+    const files = await userFile.find({ userId: req.userId });
+
+    // If no files are found, return an empty array
+    res.status(200).json(files || []); // Send empty array if no files exist
+  } catch (error) {
+    console.error("Error fetching files:", error);
+    res.status(500).json({ error: "Error fetching files" });
+  }
 });
+
+
+
+app.post("/api/upload", authenticate,  async function(req, res){
+  try{
+    const {fileName, content} = req.body;
+
+    const newFile = new userFile({
+      fileName,
+      content,
+      userId: req.userId,
+    });
+    await newFile.save();
+    res.status(201).json({message: "File uploaded successfully"})
+  } catch(error){
+    console.error("Error uploading file:", error);
+    res.status(500).send("Error uploading file");
+  }
+})
 
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, "../frontend/dist")));

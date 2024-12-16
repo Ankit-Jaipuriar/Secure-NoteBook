@@ -6,44 +6,36 @@ import { useNavigate, Link } from "react-router-dom";
 const HomePage = () => {
   const { isDark, toggleTheme } = useTheme();
   const [files, setFiles] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication state
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is authenticated by verifying the token with the backend
+    // Fetch files directly; backend handles authentication via cookies/session
     axios
-      .get("/api/verify-token", { withCredentials: true }) // API to check token validity
+      .get("/api/files", { withCredentials: true })
       .then((response) => {
-        setIsAuthenticated(true); // Token is valid, user is authenticated
-        // If authenticated, fetch files
-        return axios.get("/api/files", { withCredentials: true });
-      })
-      .then((response) => {
-        setFiles(response.data); // Load files if authenticated
+        setFiles(response.data); // Set files from the backend response
       })
       .catch((error) => {
-        console.error("Authentication error:", error);
-        setIsAuthenticated(false); // Token is invalid or not found
-        navigate("/login"); // Redirect to login page if not authenticated
+        console.error("Error fetching files:", error);
+        navigate("/login"); // Redirect to login if the user is not authenticated
       });
   }, [navigate]);
 
   const handleLogout = async (e) => {
-    e.preventDefault(); // Prevent any default behavior (if it's part of a form)
+    e.preventDefault(); // Prevent default form behavior (if any)
 
     try {
-      const response = await axios.get("/api/logout", { 
-        withCredentials: true, // Ensure cookies are included in the request
+      const response = await axios.get("/api/logout", {
+        withCredentials: true, // Ensure cookies are included
       });
 
       if (response.data === "Logged out") {
-        setIsAuthenticated(false); // Set user as logged out
-        navigate("/login"); // Redirect to login page after successful logout
+        navigate("/login"); // Redirect to login on successful logout
       } else {
-        console.log(response.data); // Display any error message from the backend
+        console.log(response.data); // Log any unexpected backend messages
       }
     } catch (error) {
-      console.error(error.response?.data || "Something went wrong"); // Handle any errors
+      console.error(error.response?.data || "Logout failed");
     }
   };
 
@@ -53,42 +45,39 @@ const HomePage = () => {
       <nav className="flex px-10 justify-between py-5">
         <h3 className="text-2xl tracking-tight">Secure-NoteBook</h3>
         <div className="navlinks flex gap-5">
-        <Link className="tracking-tight" to="/Home">Home</Link>
-        <Link className="tracking-tight" to="/create">Create New Hisaab</Link>
+          <Link className="tracking-tight" to="/Home">Home</Link>
+          <Link className="tracking-tight" to="/create">Create New Hisaab</Link>
         </div>
         <div className="flex gap-3 items-center">
           <button onClick={toggleTheme} className="text-xl">
             {isDark ? "🌙" : "☀️"}
           </button>
-          {/* Show logout button only if authenticated */}
-          {isAuthenticated && (
-            <button onClick={handleLogout} className="text-xl" title="Logout">
-              <i className="ri-logout-box-line"></i>
-            </button>
-          )}
+          <button onClick={handleLogout} className="text-xl" title="Logout">
+            <i className="ri-logout-box-line"></i>
+          </button>
         </div>
       </nav>
 
-      {/* Hisaabs Section */}
+      {/* Files Section */}
       <div className="px-10 hisaabs">
-        <h3 className="capitalize text-2xl font-medium mb-5 mt-10 tracking-tight">All hisaab kitaab</h3>
+        <h3 className="capitalize text-2xl font-medium mb-5 mt-10 tracking-tight">All Hisaab Kitaab</h3>
         {files.length > 0 ? (
           files.map((file) => (
             <div
-              key={file}
+              key={file._id}
               className="hisaab w-fit items-center py-3 mb-3 px-5 gap-20 bg-blue-500 flex justify-between rounded-md"
             >
               <div className="flex gap-4 text-white items-center">
-                <h3 className="text-2xl">{file.split(".")[0]}</h3>
-                <a href={`/hisaab/${file}`}>
+                <h3 className="text-2xl">{file.fileName}</h3>
+                <a href={`/hisaab/${file._id}`}>
                   <i className="w-6 h-6 text-blue-500 flex items-center justify-center bg-white rounded-full ri-arrow-right-line"></i>
                 </a>
               </div>
               <div className="flex gap-3 items-center">
-                <a href={`/edit/${file}`}>
+                <a href={`/edit/${file._id}`}>
                   <i className="text-white ri-pencil-line"></i>
                 </a>
-                <a href={`/delete/${file}`}>
+                <a href={`/delete/${file._id}`}>
                   <i className="w-6 h-6 text-red-500 flex items-center justify-center bg-white rounded-full ri-delete-bin-line"></i>
                 </a>
               </div>
