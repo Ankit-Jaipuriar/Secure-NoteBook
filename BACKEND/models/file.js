@@ -6,14 +6,37 @@ const fileSchema = mongoose.Schema({
     required: true,
   },
   content: {
-    type: String, // or use `Buffer` if storing large files
+    type: String,
     required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users", // Reference to the User model
+    ref: "users",
     required: true,
   },
+  encryption: {
+    type: Boolean,
+    default: false,
+  },
+  passcode: {
+    type: String, 
+  },
+  shareable: {
+    type: Boolean,
+    default: false,
+  },
+  editable: {
+    type: Boolean,
+    default: false,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  }
 });
 
 module.exports = mongoose.model("file", fileSchema);

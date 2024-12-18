@@ -24,7 +24,7 @@ export const ThemeProvider = ({ children }) => {
   }, [isDark]);
 
   const toggleTheme = () => {
-    const newTheme = !isDark ? 'dark' : 'light';
+    const newTheme = isDark ? 'dark' : 'light';
     setIsDark(!isDark);
     localStorage.setItem('theme', newTheme);
   };

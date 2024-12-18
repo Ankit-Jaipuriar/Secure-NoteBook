@@ -115,7 +115,18 @@ app.get("/api/files", authenticate, async (req, res) => {
     const files = await userFile.find({ userId: req.userId });
 
     // If no files are found, return an empty array
-    res.status(200).json(files || []); // Send empty array if no files exist
+    if (!files || files.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // Add the encryption status to each file (assuming the `encrypted` field exists in the model)
+    const filesWithStatus = files.map(file => ({
+      ...file.toObject(),
+      encrypted: file.encryption || false, // Default to false if encrypted field is missing
+    }));
+
+    // Send the files with encryption status
+    res.status(200).json(filesWithStatus);
   } catch (error) {
     console.error("Error fetching files:", error);
     res.status(500).json({ error: "Error fetching files" });
@@ -124,22 +135,113 @@ app.get("/api/files", authenticate, async (req, res) => {
 
 
 
-app.post("/api/upload", authenticate,  async function(req, res){
-  try{
-    const {fileName, content} = req.body;
+app.post("/api/verifyPasscode", async (req, res) => {
+  const { fileId, passcode } = req.body;
+
+  if (!fileId || !passcode) {
+    return res.status(400).json({ message: "File ID and passcode are required." });
+  }
+
+  try {
+    // Find the file by ID, explicitly selecting the passcode
+    const file = await userFile.findById(fileId).select("+passcode");
+
+    if (!file) {
+      return res.status(404).json({ message: "File not found." });
+    }
+
+    // Check if the file is encrypted
+    if (!file.encryption) {
+      return res.status(400).json({ message: "This file is not encrypted." });
+    }
+
+    // Compare the provided passcode with the hashed passcode in the database
+    const isMatch = await bcrypt.compare(passcode, file.passcode);
+    if (isMatch) {
+      return res.status(200).json({ success: true, message: "Passcode verified." });
+    } else {
+      return res.status(401).json({ success: false, message: "Incorrect passcode." });
+    }
+  } catch (error) {
+    console.error("Error verifying passcode:", error);
+    return res.status(500).json({ message: "An error occurred while verifying the passcode." });
+  }
+});
+
+
+function hashPasscode(passcode) {
+  const saltRounds = 10; // You can adjust the number of salt rounds as needed
+  return bcrypt.hash(passcode, saltRounds);
+}
+
+// File upload route
+app.post("/api/upload", authenticate, async (req, res) => {
+  try {
+    const { fileName, content, passcode, encryption } = req.body;
+    let hashedPasscode = null;
+
+    if (encryption && passcode) {
+      // Hash the passcode before saving
+      const salt = await bcrypt.genSalt(10);
+      hashedPasscode = await bcrypt.hash(passcode, salt);
+    }
 
     const newFile = new userFile({
       fileName,
       content,
       userId: req.userId,
+      encryption,
+      passcode: hashedPasscode, // Store the hashed passcode
     });
+
     await newFile.save();
-    res.status(201).json({message: "File uploaded successfully"})
-  } catch(error){
+    res.status(201).json({ message: "File uploaded successfully" });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res.status(500).json({ error: "Error uploading file" });
+  }
+});
+
+
+app.post("/api/upload", authenticate, async function(req, res) {
+  try {
+    const { fileName, content, encryption, shareable, editable, passcode } = req.body;
+
+    // If encryption is enabled, hash the passcode
+    let passcodeHash = "";
+    if (encryption && passcode) {
+      passcodeHash = await hashPasscode(passcode); // Use await for asynchronous hashing
+    }
+
+    // Create a new file object with all necessary fields
+    const newFile = new userFile({
+      fileName,
+      content,
+      userId: req.userId,
+      encryption,
+      shareable,
+      editable,
+      passcode: passcodeHash, // Save the hashed passcode
+      DateCreated: new Date(), // Current timestamp
+    });
+
+    // Save the file to the database
+    await newFile.save();
+
+    // Send success response
+    res.status(201).json({ message: "File uploaded successfully" });
+
+  } catch (error) {
     console.error("Error uploading file:", error);
     res.status(500).send("Error uploading file");
   }
-})
+});
+
+
+
+
+
+
 
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
