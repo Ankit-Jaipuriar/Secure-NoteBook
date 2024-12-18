@@ -76,7 +76,7 @@ const HomePage = () => {
 
   return (
     <main
-      className={`w-full h-auto ${isDark ? "bg-gray-800 text-white" : "bg-white text-black"} font-['Helvetica'] p-4 sm:p-6 overflow-y-auto`}
+      className={`w-full min-h-screen ${isDark ? "bg-gray-800 text-white" : "bg-white text-black"} font-['Helvetica'] p-4 sm:p-6 overflow-y-auto`}
     >
       <nav className="flex justify-between py-2 sm:py-4 items-center sm:px-6 px-4 relative">
         <h3 className="text-xl sm:text-2xl font-semibold tracking-tight">Secure-NoteBook</h3>
@@ -177,52 +177,19 @@ const HomePage = () => {
                 <span className="text-gray-500 text-xs sm:text-sm">{new Date(file.createdAt).toLocaleDateString()}</span>
               </div>
               <h2 className="text-lg sm:text-xl font-semibold mb-2">{file.fileName}</h2>
-              <Link
-                to="#"
+              <button
                 onClick={() => {
-                  if (file.encrypted) {
-                    setFileId(file._id); // Set the fileId here
-                    setShowPopup(true);
-                  } else {
-                    navigate(`/hisaab/${file._id}`);
-                  }
-                }}
-                className="text-blue-500 hover:underline hover:scale-105 transition-transform duration-300 text-sm sm:text-lg"
-              >
+                    if (file.encrypted) {
+                        setFileId(file._id); // Set the fileId here
+                        setShowPopup(true);
+                      } else {
+                      navigate(`/view`);
+                    }
+            }}
+              className="text-blue-500 hover:underline hover:scale-105 transition-transform duration-300 text-sm sm:text-lg"  
+            >
                 View
-              </Link>
-
-              {showPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                  <div className="bg-white rounded-lg shadow-lg p-6 w-80">
-                    <h2 className="text-lg font-semibold mb-4">Enter Passcode</h2>
-                    <input
-                      type="password"
-                      value={passcode}
-                      onChange={(e) => setPasscode(e.target.value)}
-                      placeholder="Enter passcode"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {errorMessage && (
-                      <p className="text-red-500 text-sm mb-3">{errorMessage}</p>
-                    )}
-                    <div className="flex justify-end">
-                      <button
-                        onClick={handleVerifyPasscode} // Use the stored fileId
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                      >
-                        Verify
-                      </button>
-                      <button
-                        onClick={() => setShowPopup(false)}
-                        className="ml-2 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              </button>
             </div>
           ))
         ) : (
@@ -231,6 +198,38 @@ const HomePage = () => {
           </h3>
         )}
       </div>
+      
+      {showPopup && (
+      <div className={`fixed inset-0 ${isDark ? 'bg-black bg-opacity-75' : 'bg-black bg-opacity-50'} flex justify-center items-center z-50`}>
+        <div className={`rounded-lg shadow-lg p-6 w-80 ${isDark ? 'bg-white text-black' : 'bg-white text-black'}`}>
+          <h2 className="text-lg font-semibold mb-4">Enter Passcode</h2>
+          <input
+            type="password"
+            value={passcode}
+            onChange={(e) => setPasscode(e.target.value)}
+            placeholder="Enter passcode"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {errorMessage && (
+            <p className="text-red-500 text-sm mb-3">{errorMessage}</p>
+          )}
+          <div className="flex justify-between">
+            <button
+              onClick={handleVerifyPasscode} // Use the stored fileId
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+            >
+              Verify
+            </button>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="ml-2 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </main>
   );
 };
