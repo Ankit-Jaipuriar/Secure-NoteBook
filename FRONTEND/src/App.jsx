@@ -23,7 +23,7 @@ function App() {
         <Route path="/create" element={<Create />} /> {/* Create page route */}
         <Route path="/login" element={<Login />} /> {/* Login page route */}
         <Route path="/Home" element={<HomePage />} /> {/* Home page route */}
-        <Route path="/view" element={<ViewNote />} /> {/* ViewNote page route */}
+        <Route path="/view/:fileId" element={<ViewNote />} /> {/* ViewNote page route */}
       </Routes>
     </Router>
   );

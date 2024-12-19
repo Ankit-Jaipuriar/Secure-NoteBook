@@ -133,6 +133,21 @@ app.get("/api/files", authenticate, async (req, res) => {
   }
 });
 
+app.get('/api/files/:fileId', async (req, res) => {
+  const { fileId } = req.params;
+
+  // Find the file by ID in the mock database
+  const file = await userFile.findById(fileId);
+
+  if (file) {
+    // If the file is found, return it as a JSON response
+    res.json(file);
+  } else {
+    // If no file is found, return a 404 error
+    res.status(404).json({ message: "File not found" });
+  }
+});
+
 
 
 app.post("/api/verifyPasscode", async (req, res) => {

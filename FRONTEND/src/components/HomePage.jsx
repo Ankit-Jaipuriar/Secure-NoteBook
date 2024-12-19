@@ -65,7 +65,7 @@ const HomePage = () => {
       });
       if (response.data.success) {
         setShowPopup(false);
-        navigate(`/view`);
+        navigate(`/view/${fileId}`)
       } else {
         setErrorMessage("Wrong passcode. Please try again.");
       }
@@ -174,7 +174,7 @@ const HomePage = () => {
                     </>
                   )}
                 </span>
-                <span className="text-gray-500 text-xs sm:text-sm">{new Date(file.createdAt).toLocaleDateString()}</span>
+                <span className="text-gray-500 text-xs sm:text-sm">{file.createdAt}</span>
               </div>
               <h2 className="text-lg sm:text-xl font-semibold mb-2">{file.fileName}</h2>
               <button
@@ -183,7 +183,7 @@ const HomePage = () => {
                         setFileId(file._id); // Set the fileId here
                         setShowPopup(true);
                       } else {
-                      navigate(`/view`);
+                      navigate(`/view/${file._id}`);
                     }
             }}
               className="text-blue-500 hover:underline hover:scale-105 transition-transform duration-300 text-sm sm:text-lg"  

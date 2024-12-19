@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
-const CreateHisaab = () => {
+const Create = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [message, setMessage] = useState("");
@@ -49,27 +49,27 @@ const CreateHisaab = () => {
         <h3 className="text-2xl tracking-tight">Secure-NoteBook</h3>
         <div className="navlinks flex gap-5">
           <Link className="tracking-tight" to="/Home">Home</Link>
-          <Link className="tracking-tight" to="/create">Create New Hisaab</Link>
+          <Link className="tracking-tight" to="/create">Create</Link>
         </div>
       </nav>
       <div className="px-10 flex-grow flex items-center justify-center">
         <div className="w-full max-w-3xl bg-white p-8 rounded-md shadow-md">
           <h3 className="capitalize text-2xl font-medium mb-5 tracking-tight">
-            Create New Hisaab
+            Create
           </h3>
           <form onSubmit={handleSubmit}>
             <input
               name="title"
               className="text-md px-3 py-2 w-full mb-5 rounded-md bg-zinc-200"
+              placeholder="Give a Title"
               type="text"
-              placeholder="Shopping ka hisaab, ghar ka kharch..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-            />
+              />
             <textarea
               name="content"
               className="block w-full px-3 py-2 resize-none bg-zinc-200 rounded-md min-h-[200px] mb-5"
-              placeholder="Write your hisaab."
+              placeholder="Start jotting down your notes—everything begins with a single word!"
               value={content}
               onChange={(e) => setContent(e.target.value)}
             ></textarea>
@@ -114,7 +114,7 @@ const CreateHisaab = () => {
               <input
                 type="submit"
                 className="px-5 py-3 bg-blue-500 text-white rounded-md cursor-pointer hover:bg-blue-600 transition"
-                value="Create Hisaab"
+                value="Create"
               />
             </div>
 
@@ -138,4 +138,4 @@ const CreateHisaab = () => {
   );
 };
 
-export default CreateHisaab;
+export default Create;
