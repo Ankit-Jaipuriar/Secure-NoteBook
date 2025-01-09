@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 // Configure CORS
 app.use(
   cors({
-    origin: "http://localhost:5000", // Frontend origin
+    origin: process.env.BACKEND_URL, // Frontend origin
     credentials: true, // Allow cookies to be sent
   })
 );
