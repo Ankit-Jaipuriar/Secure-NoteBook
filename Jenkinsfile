@@ -2,7 +2,8 @@ pipeline {
   agent any
 
   environment {
-    MONGO_URI = credentials('mongodb+srv://ankitkumarjaipuriar:0JdYcca7cB9qxZEo@cluster1.xbv7o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1') // Jenkins secret
+    // Directly setting the MongoDB URI without using Jenkins credentials
+    MONGO_URI = 'mongodb+srv://ankitkumarjaipuriar:0JdYcca7cB9qxZEo@cluster1.xbv7o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1'
   }
 
   stages {
@@ -20,7 +21,12 @@ pipeline {
 
     stage('Run Containers') {
       steps {
-        sh 'MONGO_URI=$MONGO_URI docker-compose up -d'
+        script {
+          // Passing the MONGO_URI environment variable to the containers
+          withEnv(["MONGO_URI=${MONGO_URI}"]) {
+            sh 'docker-compose up -d'
+          }
+        }
       }
     }
   }
