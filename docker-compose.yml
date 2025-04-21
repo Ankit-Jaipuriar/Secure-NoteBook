@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI= "mongodb+srv://ankitkumarjaipuriar:0JdYcca7cB9qxZEo@cluster1.xbv7o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"  # From .env or Jenkins
+    depends_on:
+      - frontend
+
+  frontend:
+    build:
+      context: ./FRONTEND
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"

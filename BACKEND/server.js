@@ -8,6 +8,8 @@ const cookieParser = require("cookie-parser");
 const userModel = require("./models/user");
 const userFile = require("./models/file")
 const authenticate = require('./middleware/authenticate');
+require('dotenv').config();
+
 
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.json());
@@ -16,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 // Configure CORS
 app.use(
   cors({
-    origin: "http://localhost:5000", // Frontend origin
+    origin: process.env.BACKEND_URL, // Frontend origin
     credentials: true, // Allow cookies to be sent
   })
 );
@@ -264,7 +266,7 @@ app.get("/api/users", authenticate, async (req, res) => {
 });
 
 app.post('/api/shareFile', async (req, res) => {
-  const { fileId, email } = req.body;
+  const { fileId, email, senderEmail } = req.body; // Add senderEmail to destructuring
 
   try {
     // Find the user by email
@@ -297,7 +299,7 @@ app.post('/api/shareFile', async (req, res) => {
 
       user.sharedFiles.push({
         fileId,
-        email,
+        email: senderEmail, // Store senderEmail here
         expiry: expiryTime,
       });
 
@@ -485,6 +487,6 @@ app.get("*", (req, res) => {
 });
 
 // Start the server
-app.listen(5000, () => {
+app.listen(process.env.PORT, () => {
   console.log("Backend server running on port 5000");
 });
